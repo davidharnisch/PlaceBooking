@@ -1,6 +1,6 @@
 <Solution>
   <Project Path="PlaceBooking.Application/PlaceBooking.Application.csproj" />
   <Project Path="PlaceBooking.Domain/PlaceBooking.Domain.csproj" />
-  <Project Path="PlaceBooking.Infastructure/PlaceBooking.Infastructure.csproj" />
+  <Project Path="PlaceBooking.Infrastructure/PlaceBooking.Infrastructure.csproj" />
   <Project Path="PlaceBooking.Web/PlaceBooking.Web.csproj" />
 </Solution>
