@@ -9,6 +9,6 @@ public class Seat : BaseEntity
     public int RoomId { get; set; }
     public Room? Room { get; set; }
     
-    // Pro získání historie rezervací daného místa
+    // To get booking history for this seat
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

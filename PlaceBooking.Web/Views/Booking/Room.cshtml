@@ -1,0 +1,105 @@
+@using PlaceBooking.Application.DTOs
+@model RoomDto
+
+@{
+    ViewData["Title"] = Model.Name;
+    var currentUserId = ViewBag.CurrentUserId as int? ?? 0;
+    var selectedDate = ViewBag.SelectedDate as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>@Model.Name</h2>
+    
+    <!-- Date Picker Form -->
+    <form method="get" class="d-flex gap-2">
+        <input type="hidden" name="roomId" value="@Model.Id" />
+        <input type="date" name="date" class="form-control" value="@selectedDate" onchange="this.form.submit()" />
+    </form>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<!-- Legend -->
+<div class="mb-3">
+    <span class="badge bg-success me-2">Volno</span>
+    <span class="badge bg-danger me-2">Obsazeno (Cizí)</span>
+    <span class="badge bg-primary me-2">Moje rezervace</span>
+</div>
+
+<!-- Map Grid (Simulation) -->
+<div class="card p-4 bg-light">
+    <div class="d-flex flex-wrap gap-3 justify-content-center">
+        @foreach (var seat in Model.Seats)
+        {
+            var isMyBooking = seat.IsBooked && seat.BookedBy!.Contains("Jan Novák"); // Name simulation hack, in reality ID
+            // But we don't have Booking UserId in DTO, just name string.
+            // For MVP we can't identify exactly by ID, we assume "booked" means occupied.
+            // Future improvement: Add "BookedByUserId" to DTO.
+            
+            string btnClass = "btn-outline-success"; // Free
+            string disabled = "";
+            string tooltip = "Free";
+            
+            if (seat.IsBooked)
+            {
+                btnClass = "btn-danger"; // Occupied by others
+                tooltip = $"Obsazeno: {seat.BookedBy}";
+                disabled = "disabled";
+            }
+            
+            // TODO: We need to know the UserID holding the seat to mark it blue.
+            // For now, keep it red for everyone.
+            
+            <!-- Seat Tile -->
+            <div class="position-relative">
+                @if (!seat.IsBooked)
+                {
+                    <!-- BOOKING BUTTON -->
+                    <button type="button" class="btn @btnClass p-3" style="width: 80px; height: 80px;" 
+                            data-bs-toggle="modal" data-bs-target="#confirmModal-@seat.Id">
+                        @seat.Label
+                        <br/><small>Volno</small>
+                    </button>
+                    
+                    <!-- Modal -->
+                    <div class="modal fade" id="confirmModal-@seat.Id" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Potvrzení rezervace</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Opravdu chcete zabookovat místo <strong>@seat.Label</strong> na den @selectedDate?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
+                                    <form asp-action="Create" method="post">
+                                        <input type="hidden" name="SeatId" value="@seat.Id" />
+                                        <input type="hidden" name="Date" value="@selectedDate" />
+                                        <button type="submit" class="btn btn-primary">Ano, zabookovat</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- OCCUPIED SEAT DISPLAY -->
+                    <button class="btn @btnClass p-3" style="width: 80px; height: 80px; cursor: not-allowed;" disabled title="@tooltip">
+                        @seat.Label
+                        <br/><i class="bi bi-person-fill"></i>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</div>

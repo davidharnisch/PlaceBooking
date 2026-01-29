@@ -1,0 +1,34 @@
+@{
+    ViewData["Title"] = "Rezervaèní systém";
+}
+
+<div class="text-center mb-5">
+    <h1 class="display-4">Vítejte v Booking Systému</h1>
+    <p class="lead">Vyberte si akci</p>
+</div>
+
+<div class="row">
+<!-- Tile 1: Book a place -->
+<div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-plus" style="font-size: 3rem; color: #0d6efd;"></i>
+                <h3 class="card-title mt-3">Zabookovat místo</h3>
+                <p class="card-text">Vyberte si volné místo na mapì 7. patra.</p>
+                <a asp-controller="Booking" asp-action="Room" class="btn btn-primary stretched-link">Pøejít na mapu</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tile 2: My History -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm" style="opacity: 0.6;"> <!-- Disabled visually -->
+            <div class="card-body text-center">
+                <i class="bi bi-clock-history" style="font-size: 3rem; color: #6c757d;"></i>
+                <h3 class="card-title mt-3">Historie a Pøehledy</h3>
+                <p class="card-text">Kde jsem sedìl a statistiky (V pøípravì).</p>
+                <a href="#" class="btn btn-secondary disabled">Pøipravujeme</a>
+            </div>
+        </div>
+    </div>
+</div>
