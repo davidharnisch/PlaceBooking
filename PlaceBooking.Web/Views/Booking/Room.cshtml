@@ -5,10 +5,11 @@
     ViewData["Title"] = Model.Name;
     var currentUserId = ViewBag.CurrentUserId as int? ?? 0;
     var selectedDate = ViewBag.SelectedDate as string;
+    var isReadOnly = ViewBag.IsReadOnly as bool? ?? false;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>@Model.Name</h2>
+    <h2>@(ViewBag.Title ?? Model.Name)</h2>
     
     <!-- Date Picker Form -->
     <form method="get" class="d-flex gap-2">
@@ -53,13 +54,23 @@
                 tooltip = $"Obsazeno: {seat.BookedBy}";
                 disabled = "disabled";
             }
-            
-            // TODO: We need to know the UserID holding the seat to mark it blue.
-            // For now, keep it red for everyone.
-            
+
             <!-- Seat Tile -->
             <div class="position-relative">
-                @if (!seat.IsBooked)
+                @if (isReadOnly)
+                {
+                    <button class="btn @(seat.IsBooked ? "btn-danger" : "btn-light border") p-2" 
+                            style="width: 80px; height: 80px; overflow:hidden; cursor: default;" disabled>
+                        <span class="fw-bold">@seat.Label</span>
+                        <br/>
+                        @if(seat.IsBooked) {
+                            <small style="font-size:0.65rem; display:block; line-height:1.1; margin-top:2px;">@seat.BookedBy</small>
+                        } else {
+                             <small class="text-muted">Volno</small>
+                        }
+                    </button>
+                }
+                else if (!seat.IsBooked)
                 {
                     <!-- BOOKING BUTTON -->
                     <button type="button" class="btn @btnClass p-3" style="width: 80px; height: 80px;" 
@@ -93,7 +104,7 @@
                 }
                 else
                 {
-                    <!-- OCCUPIED SEAT DISPLAY -->
+                    <!-- OCCUPIED SEAT DISPLAY (Booking Mode) -->
                     <button class="btn @btnClass p-3" style="width: 80px; height: 80px; cursor: not-allowed;" disabled title="@tooltip">
                         @seat.Label
                         <br/><i class="bi bi-person-fill"></i>

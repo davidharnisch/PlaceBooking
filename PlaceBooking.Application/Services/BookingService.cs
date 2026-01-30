@@ -117,4 +117,20 @@ public class BookingService : IBookingService
             Seats = seatDtos
         };
     }
+
+    public async Task<IEnumerable<BookingDto>> GetMyBookingsAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var bookings = await _bookingRepository.GetByUserIdAsync(userId, cancellationToken);
+        
+        // Map to DTOs
+        return bookings.Select(b => new BookingDto
+        {
+            Id = b.Id,
+            Date = b.Date,
+            SeatLabel = b.Seat?.Label ?? "Unknown",
+            RoomName = b.Seat?.Room?.Name ?? "Unknown",
+            UserName = $"{b.User?.FirstName} {b.User?.LastName}", // Should be current user
+            CreatedAt = b.CreatedAt
+        });
+    }
 }

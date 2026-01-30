@@ -22,11 +22,35 @@
 
     <!-- Tile 2: My History -->
     <div class="col-md-6 mb-4">
-        <div class="card h-100 shadow-sm" style="opacity: 0.6;"> <!-- Disabled visually -->
+        <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-                <i class="bi bi-clock-history" style="font-size: 3rem; color: #6c757d;"></i>
-                <h3 class="card-title mt-3">Historie a Pøehledy</h3>
-                <p class="card-text">Kde jsem sedìl a statistiky (V pøípravì).</p>
+                <i class="bi bi-clock-history" style="font-size: 3rem; color: #198754;"></i>
+                <h3 class="card-title mt-3">Moje Historie</h3>
+                <p class="card-text">Pøehled mých rezervací a možnost storna.</p>
+                <a asp-controller="Booking" asp-action="History" class="btn btn-success stretched-link">Zobrazit historii</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tile 3: Occupancy -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-people" style="font-size: 3rem; color: #ffc107;"></i>
+                <h3 class="card-title mt-3">Obsazenost</h3>
+                <p class="card-text">Pøehled kdo kde sedí v daný den.</p>
+                <a asp-controller="Booking" asp-action="Occupancy" class="btn btn-warning stretched-link">Zobrazit obsazenost</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tile 4: Stats -->
+     <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm" style="opacity: 0.6;">
+            <div class="card-body text-center">
+                <i class="bi bi-bar-chart-line" style="font-size: 3rem; color: #6c757d;"></i>
+                <h3 class="card-title mt-3">Vytíženost</h3>
+                <p class="card-text">Statistiky využití míst (V pøípravì).</p>
                 <a href="#" class="btn btn-secondary disabled">Pøipravujeme</a>
             </div>
         </div>

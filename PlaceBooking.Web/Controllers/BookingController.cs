@@ -79,6 +79,47 @@ public class BookingController : Controller
              TempData["ErrorMessage"] = ex.Message;
         }
         
-        return RedirectToAction("Room", new { roomId = 1, date = date });
+        // If date is provided, return to Map. If not (cancelled from History), return to History.
+        if (!string.IsNullOrEmpty(date))
+        {
+            return RedirectToAction("Room", new { roomId = 1, date = date });
+        }
+        
+        return RedirectToAction("History");
+    }
+
+    // 5. My History
+    public async Task<IActionResult> History()
+    {
+        // Hardcode UserID for MVP
+        int userId = 1; 
+        
+        var bookings = await _bookingService.GetMyBookingsAsync(userId);
+        return View(bookings);
+    }
+
+    // 6. Occupancy Overview (Read Only)
+    [HttpGet]
+    public async Task<IActionResult> Occupancy(int roomId = 1, string? date = null)
+    {
+        var selectedDate = string.IsNullOrEmpty(date) 
+            ? DateOnly.FromDateTime(DateTime.Today) 
+            : DateOnly.Parse(date);
+
+         try
+        {
+            var roomDto = await _bookingService.GetRoomStateAsync(roomId, selectedDate);
+            
+            ViewBag.SelectedDate = selectedDate.ToString("yyyy-MM-dd");
+            ViewBag.IsReadOnly = true; 
+            ViewBag.Title = "Obsazenost Místnosti - Pøehled";
+
+            // Reuse "Room" view but with IsReadOnly flag
+            return View("Room", roomDto); 
+        }
+        catch (Exception ex)
+        {
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -13,4 +13,7 @@ public interface IBookingService
     // Get room state (layout + booking info) for a specific date
     // This is for the "Book a place" view
     Task<RoomDto> GetRoomStateAsync(int roomId, DateOnly date, CancellationToken cancellationToken = default);
+
+    // Get all bookings for specific user (My History)
+    Task<IEnumerable<BookingDto>> GetMyBookingsAsync(int userId, CancellationToken cancellationToken = default);
 }
