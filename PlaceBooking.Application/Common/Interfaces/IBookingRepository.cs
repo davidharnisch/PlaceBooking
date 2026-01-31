@@ -12,4 +12,7 @@ public interface IBookingRepository : IRepository<Booking>
 
     // "Does a booking exist for this seat and date?"
     Task<bool> ExistsForSeatAndDateAsync(int seatId, DateOnly date, CancellationToken cancellationToken = default);
+
+    // "Find bookings within a date range (for stats)"
+    Task<IEnumerable<Booking>> GetByDateRangeAsync(DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
 }

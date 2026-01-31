@@ -122,4 +122,26 @@ public class BookingController : Controller
             return RedirectToAction("Index");
         }
     }
+
+    // 7. Usage Statistics
+    [HttpGet]
+    public async Task<IActionResult> Stats(string? from = null, string? to = null)
+    {
+         // Default range: First to last day of current month
+         var now = DateTime.Today;
+         var fromDate = string.IsNullOrEmpty(from) 
+             ? new DateOnly(now.Year, now.Month, 1) 
+             : DateOnly.Parse(from);
+         
+         var toDate = string.IsNullOrEmpty(to)
+             ? new DateOnly(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month))
+             : DateOnly.Parse(to);
+
+         var stats = await _bookingService.GetSeatStatisticsAsync(fromDate, toDate);
+
+         ViewBag.FromDate = fromDate.ToString("yyyy-MM-dd");
+         ViewBag.ToDate = toDate.ToString("yyyy-MM-dd");
+
+         return View(stats);
+    }
 }

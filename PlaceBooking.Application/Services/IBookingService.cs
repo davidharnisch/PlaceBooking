@@ -16,4 +16,7 @@ public interface IBookingService
 
     // Get all bookings for specific user (My History)
     Task<IEnumerable<BookingDto>> GetMyBookingsAsync(int userId, CancellationToken cancellationToken = default);
+
+    // Get usage statistics for seats in a date range
+    Task<IEnumerable<SeatStatisticsDto>> GetSeatStatisticsAsync(DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
 }

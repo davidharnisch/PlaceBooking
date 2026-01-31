@@ -33,4 +33,13 @@ public class BookingRepository : Repository<Booking>, IBookingRepository
     {
         return await _dbSet.AnyAsync(b => b.SeatId == seatId && b.Date == date, cancellationToken);
     }
+
+    public async Task<IEnumerable<Booking>> GetByDateRangeAsync(DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .Include(b => b.Seat)
+            .ThenInclude(s => s!.Room)
+            .Where(b => b.Date >= from && b.Date <= to)
+            .ToListAsync(cancellationToken);
+    }
 }

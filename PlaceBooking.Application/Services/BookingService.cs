@@ -133,4 +133,39 @@ public class BookingService : IBookingService
             CreatedAt = b.CreatedAt
         });
     }
+
+    public async Task<IEnumerable<SeatStatisticsDto>> GetSeatStatisticsAsync(DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        // 1. Get raw bookings
+        var bookings = await _bookingRepository.GetByDateRangeAsync(from, to, cancellationToken);
+
+        // 2. Group by Seat
+        // We want to count how many bookings each seat has in this period.
+        var grouped = bookings
+            .GroupBy(b => b.SeatId)
+            .Select(g => new
+            {
+                SeatId = g.Key,
+                Count = g.Count(),
+                // Take the first booking to get Seat info (Relationship is preserved in all items)
+                FirstBooking = g.FirstOrDefault() 
+            })
+            .OrderByDescending(x => x.Count);
+
+        // 3. Map to DTO
+        var result = new List<SeatStatisticsDto>();
+        foreach (var group in grouped)
+        {
+            if (group.FirstBooking?.Seat == null) continue;
+
+            result.Add(new SeatStatisticsDto
+            {
+                RoomName = group.FirstBooking.Seat.Room?.Name ?? "Unknown",
+                SeatLabel = group.FirstBooking.Seat.Label ?? "Unknown",
+                BookingsCount = group.Count
+            });
+        }
+
+        return result;
+    }
 }
