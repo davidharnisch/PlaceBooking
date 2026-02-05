@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using PlaceBooking.Application.Common.Interfaces;
 using PlaceBooking.Application.Services;
@@ -20,6 +21,15 @@ builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 
 // Register Application Services
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Add Authentication (Cookies)
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    });
 
 var app = builder.Build();
 
@@ -41,6 +51,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication(); // <-- Must be before Authorization
 app.UseAuthorization();
 
 app.MapStaticAssets();

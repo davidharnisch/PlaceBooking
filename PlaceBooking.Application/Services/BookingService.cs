@@ -51,7 +51,21 @@ public class BookingService : IBookingService
         };
 
         // 4. Save
-        await _bookingRepository.AddAsync(booking, cancellationToken);
+        try 
+        {
+            await _bookingRepository.AddAsync(booking, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Catch database constraint violation (Unique Index)
+            // Note: In real app, check specifically for DbUpdateException and inner exception code (SQLite: 19)
+            // Since we added unique index on SeatId + Date, this will fail if simulation race condition occurs.
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE constraint failed"))
+            {
+                throw new Exception("Seat is already booked for this date (Concurrency conflict).");
+            }
+            throw; // Rethrow other errors
+        }
         
         // 5. Return DTO
         return new BookingDto

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore; // Needed for Migrate()
 using PlaceBooking.Domain.Entities;
 
 namespace PlaceBooking.Infrastructure.Persistence;
@@ -6,19 +7,26 @@ public static class DbInitializer
 {
     public static void Initialize(ApplicationDbContext context)
     {
-        context.Database.EnsureCreated();
+        // APPLY MIGRATIONS automatically
+        // This replaces EnsureCreated() which skips migrations history
+        context.Database.Migrate();
 
-        // Look for any users.
+        // Look for any users.x
         if (context.Users.Any())
         {
             return;   // DB has been seeded
         }
 
+        // Default password for seed users: "heslo123"
+        // In real app, we would use AuthService, but here we can't inject it easily (static method),
+        // so we just manually hash it using BCrypt directly.
+        string defaultHash = BCrypt.Net.BCrypt.HashPassword("heslo123");
+
         var users = new User[]
         {
-            new User { FirstName = "Jan", LastName = "Novák", Email = "jan.novak@test.com" },
-            new User { FirstName = "Petr", LastName = "Svoboda", Email = "petr.svoboda@tulli.com" },
-            new User { FirstName = "Admin", LastName = "User", Email = "admin@placebooking.com" }
+            new User { FirstName = "Jan", LastName = "Novák", Email = "jan.novak@test.com", PasswordHash = defaultHash },
+            new User { FirstName = "Petr", LastName = "Svoboda", Email = "petr.svoboda@tulli.com", PasswordHash = defaultHash },
+            new User { FirstName = "Admin", LastName = "User", Email = "admin@placebooking.com", PasswordHash = defaultHash }
         };
 
         foreach (var u in users)

@@ -1,9 +1,12 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlaceBooking.Application.DTOs;
 using PlaceBooking.Application.Services;
 
 namespace PlaceBooking.Web.Controllers;
 
+[Authorize] // Protect entire controller
 public class BookingController : Controller
 {
     private readonly IBookingService _bookingService;
@@ -34,7 +37,7 @@ public class BookingController : Controller
             
             // Pass the date to view via ViewBag to keep it in input
             ViewBag.SelectedDate = selectedDate.ToString("yyyy-MM-dd");
-            ViewBag.CurrentUserId = 1; // Hardcoded for MVP (Jan Novák)
+            ViewBag.CurrentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             return View(roomDto);
         }
@@ -50,8 +53,8 @@ public class BookingController : Controller
     {
         try
         {
-            // Hardcode UserID for now (simulation of logged in user)
-            model.UserId = 1; 
+            // Use logged in user ID
+            model.UserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             await _bookingService.CreateBookingAsync(model);
             
@@ -71,7 +74,8 @@ public class BookingController : Controller
     {
         try 
         {
-             await _bookingService.CancelBookingAsync(bookingId, userId: 1);
+             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+             await _bookingService.CancelBookingAsync(bookingId, userId);
              TempData["SuccessMessage"] = "Booking cancelled.";
         }
         catch(Exception ex)
@@ -91,8 +95,7 @@ public class BookingController : Controller
     // 5. My History
     public async Task<IActionResult> History()
     {
-        // Hardcode UserID for MVP
-        int userId = 1; 
+        int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         
         var bookings = await _bookingService.GetMyBookingsAsync(userId);
         return View(bookings);

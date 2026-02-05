@@ -35,6 +35,12 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(b => b.SeatId)
             .OnDelete(DeleteBehavior.Restrict); // Prevent deleting seat if bookings exist
 
+        // Concurrent Booking Protection: Unique Index on SeatId + Date
+        // This ensures the database physically rejects duplicate bookings.
+        modelBuilder.Entity<Booking>()
+            .HasIndex(b => new { b.SeatId, b.Date })
+            .IsUnique();
+
         // User -> Bookings (One-to-Many)
         // Note: User entity doesn't have a Bookings collection defined yet in Domain, 
         // but we can configure the relationship from Booking side.
