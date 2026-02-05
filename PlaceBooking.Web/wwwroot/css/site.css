@@ -1,5 +1,7 @@
 html {
   font-size: 14px;
+  position: relative;
+  min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -12,13 +14,22 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+body {
+  background-color: #F7F7FA;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-body {
-  margin-bottom: 60px;
+/* Ensure the main container expands to push footer down */
+body > .container {
+  flex: 1;
+}
+
+.footer {
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {

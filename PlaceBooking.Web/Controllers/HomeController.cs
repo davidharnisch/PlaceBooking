@@ -8,12 +8,12 @@ namespace PlaceBooking.Web.Controllers
     {
         public IActionResult Index()
         {
-            return View();
-        }
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                return RedirectToAction("Index", "Booking");
+            }
 
-        public IActionResult Privacy()
-        {
-            return View();
+            return RedirectToAction("Login", "Account");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
