@@ -24,7 +24,7 @@
         @if (!Model.Any())
         {
             <div class="text-center py-5 text-muted">
-                <i class="bi bi-journal-x" style="font-size: 2rem;"></i>
+                <i class="bi bi-journal-x pb-tile-icon" style="font-size: 2rem;"></i>
                 <p class="mt-2">Nemáte zatím žádné rezervace.</p>
                 <a asp-action="Room" class="btn btn-primary btn-sm">Zabookovat místo</a>
             </div>
@@ -57,7 +57,7 @@
                                 </td>
                                 <td>@item.RoomName</td>
                                 <td>
-                                    <span class="badge bg-info text-dark">@item.SeatLabel</span>
+                                    <span class="badge pb-badge">@item.SeatLabel</span>
                                 </td>
                                 <td>@item.CreatedAt.ToString("g")</td>
                                 <td>

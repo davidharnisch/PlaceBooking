@@ -119,7 +119,9 @@ public class BookingService : IBookingService
                 Label = seat.Label,
                 IsBooked = booking != null,
                 BookedBy = booking != null ? $"{booking.User?.FirstName} {booking.User?.LastName}" : null,
-                BookedAt = booking?.CreatedAt
+                BookedAt = booking?.CreatedAt,
+                BookingId = booking?.Id,
+                BookedByUserId = booking?.UserId
             };
             seatDtos.Add(seatDto);
         }

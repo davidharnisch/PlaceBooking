@@ -38,6 +38,7 @@ public class BookingController : Controller
             // Pass the date to view via ViewBag to keep it in input
             ViewBag.SelectedDate = selectedDate.ToString("yyyy-MM-dd");
             ViewBag.CurrentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            ViewBag.IsReadOnly = false;
 
             return View(roomDto);
         }
@@ -58,7 +59,7 @@ public class BookingController : Controller
 
             await _bookingService.CreateBookingAsync(model);
             
-            TempData["SuccessMessage"] = "Booking successfully created!";
+            TempData["SuccessMessage"] = "Rezervace úspìšnì vytvoøena!";
             return RedirectToAction("Room", new { roomId = 1, date = model.Date.ToString("yyyy-MM-dd") });
         }
         catch (Exception ex)
@@ -76,7 +77,7 @@ public class BookingController : Controller
         {
              var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
              await _bookingService.CancelBookingAsync(bookingId, userId);
-             TempData["SuccessMessage"] = "Booking cancelled.";
+             TempData["SuccessMessage"] = "Rezervace zrušena!";
         }
         catch(Exception ex)
         {
@@ -116,6 +117,7 @@ public class BookingController : Controller
             ViewBag.SelectedDate = selectedDate.ToString("yyyy-MM-dd");
             ViewBag.IsReadOnly = true; 
             ViewBag.Title = "Obsazenost Místnosti - Pøehled";
+            ViewBag.CurrentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             // Reuse "Room" view but with IsReadOnly flag
             return View("Room", roomDto); 

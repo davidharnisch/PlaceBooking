@@ -24,7 +24,7 @@
                 <input type="date" name="to" class="form-control" value="@toDate" />
             </div>
             <div class="col-md-4">
-                <button type="submit" class="btn btn-primary w-100">
+                <button type="submit" class="btn btn-primary btn-cta w-100">
                     <i class="bi bi-filter"></i> Zobrazit
                 </button>
             </div>
@@ -60,11 +60,11 @@
                         int percent = (int)((double)item.BookingsCount / maxCount * 100);
                         <tr>
                             <td>@item.RoomName</td>
-                            <td><span class="badge bg-secondary">@item.SeatLabel</span></td>
+                            <td><span class="badge pb-badge">@item.SeatLabel</span></td>
                             <td class="text-end fw-bold">@item.BookingsCount</td>
                             <td>
                                 <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-info" style="width: @percent%"></div>
+                                    <div class="progress-bar pb-progress" style="width: @percent%"></div>
                                 </div>
                             </td>
                         </tr>

@@ -8,4 +8,6 @@ public class SeatDto
     // If booked, show who booked it (for tooltip)
     public string? BookedBy { get; set; }
     public DateTime? BookedAt { get; set; }
+    public int? BookingId { get; set; }
+    public int? BookedByUserId { get; set; }
 }

@@ -14,6 +14,7 @@ public class BookingRepository : Repository<Booking>, IBookingRepository
     public async Task<IEnumerable<Booking>> GetByDateAndRoomAsync(DateOnly date, int roomId, CancellationToken cancellationToken = default)
     {
         return await _dbSet
+            .Include(b => b.User)
             .Include(b => b.Seat) // Include info about the seat
             .Where(b => b.Date == date && b.Seat!.RoomId == roomId)
             .ToListAsync(cancellationToken);

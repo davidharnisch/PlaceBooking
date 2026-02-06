@@ -4,6 +4,14 @@ html {
   min-height: 100%;
 }
 
+:root {
+  --pb-color-action: #8fea06;
+  --pb-color-action-text: #023444;
+  --pb-color-cta: #884DFF;
+  --pb-color-footer: #023444;
+  --pb-color-surface: #F7F7FA;
+}
+
 @media (min-width: 768px) {
   html {
     font-size: 16px;
@@ -15,7 +23,7 @@ html {
 }
 
 body {
-  background-color: #F7F7FA;
+  background-color: var(--pb-color-surface);
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
@@ -30,6 +38,101 @@ body > .container {
 .footer {
   flex-shrink: 0;
   width: 100%;
+}
+
+/* Footer theme */
+.footer {
+  background-color: var(--pb-color-footer);
+  color: #fff !important;
+}
+
+.footer a {
+  color: #fff;
+}
+
+/* Buttons theme (map Bootstrap variants to our palette) */
+.btn-primary,
+.btn-success,
+.btn-warning {
+  background-color: var(--pb-color-action) !important;
+  border-color: var(--pb-color-action) !important;
+  color: var(--pb-color-action-text) !important;
+}
+
+.btn-primary:hover,
+.btn-success:hover,
+.btn-warning:hover {
+  filter: brightness(0.95);
+}
+
+.btn-outline-primary {
+  border-color: var(--pb-color-action) !important;
+  color: var(--pb-color-action-text) !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--pb-color-action) !important;
+  border-color: var(--pb-color-action) !important;
+  color: var(--pb-color-action-text) !important;
+}
+
+/* CTA buttons (submit/create/register) */
+.btn-cta,
+.btn-cta:active,
+.btn-cta:focus {
+  background-color: var(--pb-color-cta) !important;
+  border-color: var(--pb-color-cta) !important;
+  color: #fff !important;
+}
+
+.btn-cta:hover {
+  filter: brightness(0.95);
+}
+
+/* Shared labels */
+.pb-badge {
+  background-color: var(--pb-color-cta) !important;
+  color: #fff !important;
+}
+
+/* Stats progress bar */
+.pb-progress {
+  background-color: var(--pb-color-cta) !important;
+}
+
+/* Dashboard tile icons */
+.pb-tile-icon {
+  font-size: 3rem;
+  color: var(--pb-color-cta);
+}
+
+.pb-card-header {
+  background-color: var(--pb-color-cta) !important;
+}
+
+/* Booking index tiles */
+.pb-tile-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+/*
+.pb-tile,
+.pb-tile * {
+  cursor: pointer;
+}*/
+
+.pb-tile {
+  transition: box-shadow 120ms ease, transform 120ms ease;
+}
+
+.pb-tile-link:hover .pb-tile {
+  transform: translateY(-2px);
+}
+
+/* Hover button effect when hovering the whole tile */
+.pb-tile-link:hover .btn {
+  filter: brightness(0.95);
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
