@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Výbìr místnosti";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Vyberte místnost</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">Zpìt na pøehled</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="pb-rooms-map" data-room-map>
+            <img class="img-fluid" src="~/images/rooms-map.svg" alt="Mapa místností" />
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        (function () {
+            const mapHost = document.querySelector('[data-room-map]');
+            if (!mapHost) return;
+
+            const img = mapHost.querySelector('img');
+            if (!img) return;
+
+            fetch(img.src)
+                .then(r => r.text())
+                .then(svgText => {
+                    mapHost.innerHTML = svgText;
+
+                    const svg = mapHost.querySelector('svg');
+                    if (!svg) return;
+
+                    svg.classList.add('pb-rooms-map-svg');
+
+                    const room1 = svg.querySelector('#room-1');
+                    if (!room1) return;
+
+                    room1.classList.add('pb-room');
+
+                    room1.addEventListener('click', () => {
+                        window.location.href = '@Url.Action("Room", "Booking", new { roomId = 1 })';
+                    });
+                })
+                .catch(() => {
+                    // Keep the <img> fallback.
+                });
+        })();
+    </script>
+}

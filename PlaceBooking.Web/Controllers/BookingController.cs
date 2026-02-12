@@ -22,6 +22,13 @@ public class BookingController : Controller
         return View();
     }
 
+    // 1.5 Rooms map (selection)
+    [HttpGet]
+    public IActionResult Map()
+    {
+        return View();
+    }
+
     // 2. Room and Date Selection (Map)
     [HttpGet]
     public async Task<IActionResult> Room(int roomId = 1, string? date = null)

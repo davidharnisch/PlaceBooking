@@ -4,6 +4,21 @@ html {
   min-height: 100%;
 }
 
+/* Rooms map (SVG) */
+.pb-rooms-map-svg {
+  width: 100%;
+  height: auto;
+}
+
+.pb-room {
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.pb-room:hover {
+  filter: brightness(0.92);
+}
+
 :root {
   --pb-color-action: #8fea06;
   --pb-color-action-text: #023444;
