@@ -17,4 +17,8 @@ public class RegisterDto
     [Required]
     [MinLength(6, ErrorMessage = "Heslo musí mít alespoò 6 znakù")]
     public string Password { get; set; } = string.Empty;
+
+    [Required]
+    [Compare("Password", ErrorMessage = "Hesla se musí shodovat")]
+    public string ConfirmPassword { get; set; } = string.Empty;
 }

@@ -50,6 +50,10 @@ body > .container {
   flex: 1;
 }
 
+main[role="main"] {
+  padding-bottom: 2rem;
+}
+
 .footer {
   flex-shrink: 0;
   width: 100%;

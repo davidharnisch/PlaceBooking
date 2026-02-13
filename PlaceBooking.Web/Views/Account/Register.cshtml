@@ -38,9 +38,25 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Heslo</label>
-                        <input asp-for="Password" type="password" class="form-control" />
+                        <div class="input-group">
+                            <input asp-for="Password" type="password" class="form-control" id="Password" />
+                            <button type="button" class="btn btn-outline-secondary btn-toggle-password" data-target="Password" aria-label="Zobrazit/skrýt heslo">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                         <span asp-validation-for="Password" class="text-danger"></span>
-                        <div class="form-text">Minimálnì 6 znakù.</div>
+
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Potvrzení hesla</label>
+                        <div class="input-group">
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" id="ConfirmPassword" />
+                            <button type="button" class="btn btn-outline-secondary btn-toggle-password" data-target="ConfirmPassword" aria-label="Zobrazit/skrýt heslo">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                     </div>
 
                     <div class="d-grid gap-2">

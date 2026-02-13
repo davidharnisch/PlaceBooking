@@ -27,7 +27,12 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Heslo</label>
-                        <input type="password" name="password" class="form-control" required />
+                        <div class="input-group">
+                            <input type="password" name="password" class="form-control" id="Password" required />
+                            <button type="button" class="btn btn-outline-secondary btn-toggle-password" data-target="Password" aria-label="Zobrazit/skrýt heslo">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary btn-cta">Pøihlásit se</button>
@@ -46,3 +51,14 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // ensure password toggles are initialized for this view
+        (function () {
+            if (typeof setupPasswordToggles === 'function') {
+                try { setupPasswordToggles(document); } catch { }
+            }
+        })();
+    </script>
+}

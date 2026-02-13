@@ -37,8 +37,9 @@ public static class DbInitializer
 
         var rooms = new Room[]
         {
-            new Room { Name = "Sever" },
-            new Room { Name = "Apollo" }
+            new Room { Name = "TULLI" },
+            new Room { Name = "eCustoms" },
+            new Room { Name = "TMA" }
         };
 
         foreach (var r in rooms)
@@ -47,27 +48,38 @@ public static class DbInitializer
         }
         context.SaveChanges();
         
-        // Add seats to Sever
-        var sever = rooms[0];
+        // Add seats to Tulli
+        var tulli = rooms[0];
         var seats = new List<Seat>();
         
-        for (int i = 1; i <= 20; i++)
+        for (int i = 1; i <= 24; i++)
         {
             seats.Add(new Seat 
             { 
-                Label = $"Sever-{i}", 
-                RoomId = sever.Id 
+                Label = $"TULLI-{i}", 
+                RoomId = tulli.Id 
             });
         }
         
-        // Add seats to Blue Zone
-        var apollo = rooms[1];
-        for (int i = 1; i <= 15; i++)
+        // Add seats to eCustoms
+        var eCustoms = rooms[1];
+        for (int i = 1; i <= 18; i++)
         {
              seats.Add(new Seat 
             { 
-                Label = $"Apollo-{i}", 
-                RoomId = apollo.Id 
+                Label = $"eCustoms-{i}", 
+                RoomId = eCustoms.Id 
+            });
+        }
+
+        // Add seats to TMA
+        var tma = rooms[2];
+        for (int i = 1; i <= 30; i++)
+        {
+            seats.Add(new Seat
+            {
+                Label = $"TMA-{i}",
+                RoomId = tma.Id
             });
         }
 

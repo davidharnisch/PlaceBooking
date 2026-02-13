@@ -35,13 +35,21 @@
 
                     svg.classList.add('pb-rooms-map-svg');
 
-                    const room1 = svg.querySelector('#room-1');
-                    if (!room1) return;
+                    // select all elements whose id starts with "room-" (room-1, room-2, ...)
+                    const rooms = svg.querySelectorAll('[id^="room-"]');
+                    const roomBaseUrl = '@Url.Action("Room", "Booking")';
 
-                    room1.classList.add('pb-room');
+                    rooms.forEach(room => {
+                        if (!room || !room.id) return;
 
-                    room1.addEventListener('click', () => {
-                        window.location.href = '@Url.Action("Room", "Booking", new { roomId = 1 })';
+                        room.classList.add('pb-room');
+
+                        room.addEventListener('click', () => {
+                            // parse numeric part from id like "room-1"
+                            const m = room.id.match(/room-(\d+)/i);
+                            const roomId = m ? m[1] : room.id;
+                            window.location.href = roomBaseUrl + '?roomId=' + encodeURIComponent(roomId);
+                        });
                     });
                 })
                 .catch(() => {
