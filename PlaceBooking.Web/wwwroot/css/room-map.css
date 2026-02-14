@@ -1,0 +1,52 @@
+/* Room seating map (SVG seats) */
+.pb-room-map-svg {
+  width: 100%;
+  height: auto;
+}
+
+.pb-seat {
+  cursor: pointer;
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+
+.pb-seat--disabled {
+  cursor: not-allowed;
+}
+
+/* Colors: free / mine / busy */
+.pb-seat--free {
+  fill: var(--bs-success);
+}
+
+.pb-seat--mine {
+  fill: var(--bs-warning);
+}
+
+.pb-seat--busy {
+  fill: var(--bs-danger);
+}
+
+/*
+  In our SVGs the seat id/class is often on a <g>, while the visible shape (ellipse/circle/path)
+  has its own fill attribute (e.g. fill="#fff"). CSS fill on <g> does not override the child's
+  inline fill. Override the fill on common child shapes explicitly.
+*/
+.pb-seat--free :is(circle, ellipse, path, rect, polygon) {
+  fill: var(--bs-success) !important;
+}
+
+.pb-seat--mine :is(circle, ellipse, path, rect, polygon) {
+  fill: var(--bs-warning) !important;
+}
+
+.pb-seat--busy :is(circle, ellipse, path, rect, polygon) {
+  fill: var(--bs-danger) !important;
+}
+
+.pb-seat:hover {
+  filter: brightness(0.92);
+}
+
+.pb-seat--disabled:hover {
+  filter: none;
+}

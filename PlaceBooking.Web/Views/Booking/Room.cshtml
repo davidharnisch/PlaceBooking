@@ -56,120 +56,193 @@
     <span class="badge btn-primary me-2">Moje rezervace</span>
 </div>
 
-<!-- Map Grid (Simulation) -->
-<div class="card p-4 bg-light">
-    <div class="d-flex flex-wrap gap-3 justify-content-center">
-        @foreach (var seat in Model.Seats)
-        {
-            var isMyBooking = seat.IsBooked && seat.BookedByUserId == currentUserId;
-            var bookedAtLocal = seat.BookedAt?.ToLocalTime();
+<!-- Seating map (SVG). The SVG is expected at /images/room-<roomId>.svg or can be adjusted later. -->
+@{
+    var svgPath = Url.Content($"~/images/room-{Model.Id}.svg");
+}
 
-            var tooltip = "Volno";
-            if (seat.IsBooked)
-            {
-                tooltip = isMyBooking
-                    ? $"Moje rezervace | Vytvoøeno: {bookedAtLocal:dd.MM.yyyy HH:mm}"
-                    : $"Obsazeno: {seat.BookedBy} | Vytvoøeno: {bookedAtLocal:dd.MM.yyyy HH:mm}";
+<div class="card p-4 bg-light">
+    <div class="pb-room-map" data-room-map data-svg-url="@svgPath" data-room-id="@Model.Id"></div>
+</div>
+
+    <!-- Single reusable modal -->
+    <div class="modal fade" id="seatActionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="seatActionModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="seatActionModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavøít</button>
+
+                    <form id="seatCreateForm" asp-action="Create" method="post" class="d-none">
+                        <input type="hidden" name="SeatId" id="seatCreateSeatId" />
+                        <input type="hidden" name="Date" value="@selectedDateRaw" />
+                        <button type="submit" class="btn btn-primary">Ano, zabookovat</button>
+                    </form>
+
+                    <form id="seatCancelForm" asp-action="Cancel" method="post" class="d-none">
+                        <input type="hidden" name="bookingId" id="seatCancelBookingId" />
+                        <input type="hidden" name="date" value="@selectedDateRaw" />
+                        <button type="submit" class="btn btn-danger">Ano, zrušit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@section Scripts
+{
+    <script>
+        (function () {
+            function init() {
+                const host = document.querySelector('[data-room-map]');
+                if (!host) return;
+
+                const svgUrl = host.getAttribute('data-svg-url');
+                if (!svgUrl) return;
+
+                const roomId = host.getAttribute('data-room-id');
+                if (!roomId) return;
+
+                const seats = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Seats));
+                const currentUserId = @currentUserId;
+                const isReadOnly = @(isReadOnly ? "true" : "false");
+                const selectedDate = '@selectedDateRaw';
+                const isSelectedDateNotInPast = @((isSelectedDateNotInPast) ? "true" : "false");
+                const todayRaw = '@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")';
+
+                function seatNumberFromLabel(label) {
+                    // Labels are like "TULLI-1" -> 1
+                    if (!label) return null;
+                    const m = String(label).match(/-(\d+)$/);
+                    return m ? m[1] : null;
+                }
+
+                function applySeatState(svg, seatEl, seat) {
+                    const isMyBooking = seat.IsBooked && seat.BookedByUserId === currentUserId;
+                    const isPastDate = selectedDate < todayRaw;
+                    const canCreateBooking = !isReadOnly && !isPastDate;
+                    const canCancelBooking = !isReadOnly && isSelectedDateNotInPast;
+
+                    seatEl.classList.add('pb-seat');
+                    seatEl.classList.toggle('pb-seat--free', !seat.IsBooked);
+                    seatEl.classList.toggle('pb-seat--mine', isMyBooking);
+                    seatEl.classList.toggle('pb-seat--busy', seat.IsBooked && !isMyBooking);
+                    seatEl.classList.toggle('pb-seat--disabled', (!canCreateBooking && !seat.IsBooked) || (seat.IsBooked && !isMyBooking));
+
+                    let tooltip = 'Volno';
+                    if (seat.IsBooked) {
+                        const bookedAt = seat.BookedAt ? new Date(seat.BookedAt) : null;
+                        const bookedAtText = bookedAt ? bookedAt.toLocaleString('cs-CZ') : '';
+                        tooltip = isMyBooking
+                            ? `Moje rezervace${bookedAtText ? ' | Vytvoøeno: ' + bookedAtText : ''}`
+                            : `Obsazeno: ${seat.BookedBy || ''}${bookedAtText ? ' | Vytvoøeno: ' + bookedAtText : ''}`;
+                    }
+
+                    seatEl.setAttribute('data-bs-toggle', 'tooltip');
+                    seatEl.setAttribute('data-bs-placement', 'top');
+                    seatEl.setAttribute('data-bs-title', tooltip);
+                }
+
+                fetch(svgUrl)
+                    .then(r => {
+                        if (!r.ok) throw new Error('Failed to load SVG: ' + r.status);
+                        return r.text();
+                    })
+                    .then(svgText => {
+                        host.innerHTML = svgText;
+
+                        const svg = host.querySelector('svg');
+                        if (!svg) return;
+                        svg.classList.add('pb-room-map-svg');
+
+                        // map seats by seatNumber derived from label
+                        const seatByNumber = new Map();
+                        for (const s of seats) {
+                            const n = seatNumberFromLabel(s.Label);
+                            if (n) seatByNumber.set(String(n), s);
+                        }
+
+                        const seatEls = svg.querySelectorAll('[id^="seat-"]');
+                        if (!seatEls.length) {
+                            console.warn('No seat elements found in SVG. Expected ids like seat-' + roomId + '-1 ...');
+                        }
+
+                        seatEls.forEach(seatEl => {
+                            const id = seatEl.getAttribute('id') || '';
+                            const m = id.match(/^seat-(\d+)-(\d+)$/);
+                            if (!m) return;
+                            const svgRoomId = m[1];
+                            const seatNo = String(parseInt(m[2], 10));
+                            if (svgRoomId !== String(roomId)) return;
+
+                            const seat = seatByNumber.get(seatNo);
+                            if (!seat) return;
+
+                            let targetEl = seatEl;
+                            if (seatEl.children && seatEl.children.length === 1) {
+                                targetEl = seatEl.children[0];
+                            }
+
+                            applySeatState(svg, targetEl, seat);
+
+                            seatEl.addEventListener('click', () => {
+                                const isMyBooking = seat.IsBooked && seat.BookedByUserId === currentUserId;
+                                const isPastDate = selectedDate < todayRaw;
+                                const canCreateBooking = !isReadOnly && !isPastDate;
+                                const canCancelBooking = !isReadOnly && isSelectedDateNotInPast;
+
+                                const modalEl = document.getElementById('seatActionModal');
+                                if (!modalEl || !window.bootstrap) return;
+
+                                const titleEl = document.getElementById('seatActionModalTitle');
+                                const bodyEl = document.getElementById('seatActionModalBody');
+                                const createForm = document.getElementById('seatCreateForm');
+                                const cancelForm = document.getElementById('seatCancelForm');
+                                const createSeatId = document.getElementById('seatCreateSeatId');
+                                const cancelBookingId = document.getElementById('seatCancelBookingId');
+
+                                if (!titleEl || !bodyEl || !createForm || !cancelForm || !createSeatId || !cancelBookingId) return;
+
+                                createForm.classList.add('d-none');
+                                cancelForm.classList.add('d-none');
+
+                                if (!seat.IsBooked && canCreateBooking) {
+                                    titleEl.textContent = 'Potvrzení rezervace';
+                                    bodyEl.innerHTML = `Opravdu chcete zabookovat místo <strong>${seat.Label}</strong> na den ${'@selectedDateDisplay'}?`;
+                                    createSeatId.value = seat.Id;
+                                    createForm.classList.remove('d-none');
+                                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                                } else if (seat.IsBooked && isMyBooking && canCancelBooking && seat.BookingId) {
+                                    titleEl.textContent = 'Zrušit rezervaci';
+                                    bodyEl.innerHTML = `Opravdu chcete zrušit svou rezervaci místa <strong>${seat.Label}</strong> pro den ${'@selectedDateDisplay'}?`;
+                                    cancelBookingId.value = seat.BookingId;
+                                    cancelForm.classList.remove('d-none');
+                                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                                }
+                            });
+                        });
+
+                        // enable tooltips for dynamically added SVG attributes
+                        if (window.bootstrap) {
+                            svg.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+                                bootstrap.Tooltip.getOrCreateInstance(el);
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to initialize seating SVG map', err);
+                    });
             }
 
-            var isPastDate = selectedDateOnly < DateOnly.FromDateTime(DateTime.Today);
-            var canCreateBooking = !isReadOnly && !isPastDate;
-            var canCancelBooking = !isReadOnly && isSelectedDateNotInPast;
-
-            var btnClass = !seat.IsBooked
-                ? "btn-outline-success"
-                : isMyBooking
-                    ? "btn-primary"
-                    : "btn-danger";
-
-            <div class="position-relative" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="@tooltip">
-                @if (isReadOnly)
-                {
-                    <button class="btn @btnClass p-2" 
-                            style="width: 80px; height: 80px; overflow:hidden; cursor: default;" disabled>
-                        <span class="fw-bold">@seat.Label</span>
-                        <br/>
-                        @if(seat.IsBooked) {
-                            <small style="font-size:0.65rem; display:block; line-height:1.1; margin-top:2px;">@seat.BookedBy</small>
-                        } else {
-                             <small class="text-muted">Volno</small>
-                        }
-                    </button>
-                }
-                else if (!seat.IsBooked)
-                {
-                    <button type="button" class="btn @btnClass p-3" style="width: 80px; height: 80px;" 
-                            data-bs-toggle="modal" data-bs-target="#confirmModal-@seat.Id" disabled="@(!canCreateBooking)">
-                        @seat.Label
-                        <br/><small>Volno</small>
-                    </button>
-                    
-                    @if (canCreateBooking)
-                    {
-                        <div class="modal fade" id="confirmModal-@seat.Id" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Potvrzení rezervace</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Opravdu chcete zabookovat místo <strong>@seat.Label</strong> na den @selectedDateDisplay?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
-                                        <form asp-action="Create" method="post">
-                                            <input type="hidden" name="SeatId" value="@seat.Id" />
-                                            <input type="hidden" name="Date" value="@selectedDate" />
-                                            <button type="submit" class="btn btn-primary">Ano, zabookovat</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
-                else
-                {
-                    @if (isMyBooking && canCancelBooking && seat.BookingId != null)
-                    {
-                        <button type="button" class="btn @btnClass p-3" style="width: 80px; height: 80px;" 
-                                data-bs-toggle="modal" data-bs-target="#cancelModal-@seat.Id">
-                            @seat.Label
-                            <br/><small>Moje</small>
-                        </button>
-
-                        <div class="modal fade" id="cancelModal-@seat.Id" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Zrušit rezervaci</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Opravdu chcete zrušit svou rezervaci místa <strong>@seat.Label</strong> pro den @selectedDateDisplay?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavøít</button>
-                                        <form asp-action="Cancel" method="post">
-                                            <input type="hidden" name="bookingId" value="@seat.BookingId" />
-                                            <input type="hidden" name="date" value="@selectedDateRaw" />
-                                            <button type="submit" class="btn btn-danger">Ano, zrušit</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <button class="btn @btnClass p-3" style="width: 80px; height: 80px; cursor: not-allowed;" disabled>
-                            @seat.Label
-                            <br/><i class="bi bi-person-fill"></i>
-                        </button>
-                    }
-                }
-            </div>
-        }
-    </div>
-</div>
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+}
