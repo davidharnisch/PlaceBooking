@@ -22,11 +22,6 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        return await _dbSet.ToListAsync(cancellationToken);
-    }
-
     public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
         return await _dbSet.Where(predicate).ToListAsync(cancellationToken);
@@ -48,10 +43,5 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync(cancellationToken);
-    }
-    
-    public async Task<IEnumerable<T>> GetAllNoTrackingAsync(CancellationToken cancellationToken = default)
-    {
-        return await _dbSet.AsNoTracking().ToListAsync(cancellationToken);
     }
 }

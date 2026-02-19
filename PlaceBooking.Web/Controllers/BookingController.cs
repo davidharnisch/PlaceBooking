@@ -29,10 +29,22 @@ public class BookingController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult MapOccupancy()
+    {
+        ViewBag.IsReadOnly = true;
+        return View("Map");
+    }
+
     // 2. Room and Date Selection (Map)
     [HttpGet]
-    public async Task<IActionResult> Room(int roomId = 1, string? date = null)
+    public async Task<IActionResult> Room(int? roomId = null, string? date = null)
     {
+        if (roomId is null)
+        {
+            return RedirectToAction(nameof(Map));
+        }
+
         // Default to today if date not provided
         var selectedDate = string.IsNullOrEmpty(date) 
             ? DateOnly.FromDateTime(DateTime.Today) 
@@ -40,7 +52,7 @@ public class BookingController : Controller
 
         try
         {
-            var roomDto = await _bookingService.GetRoomStateAsync(roomId, selectedDate);
+            var roomDto = await _bookingService.GetRoomStateAsync(roomId.Value, selectedDate);
             
             // Pass the date to view via ViewBag to keep it in input
             ViewBag.SelectedDate = selectedDate.ToString("yyyy-MM-dd");
@@ -67,12 +79,12 @@ public class BookingController : Controller
             await _bookingService.CreateBookingAsync(model);
             
             TempData["SuccessMessage"] = "Rezervace úspìšnì vytvoøena!";
-            return RedirectToAction("Room", new { roomId = 1, date = model.Date.ToString("yyyy-MM-dd") });
+            return RedirectToAction("Room", new { roomId = model.RoomId, date = model.Date.ToString("yyyy-MM-dd") });
         }
         catch (Exception ex)
         {
             TempData["ErrorMessage"] = ex.Message;
-            return RedirectToAction("Room", new { roomId = 1, date = model.Date.ToString("yyyy-MM-dd") });
+            return RedirectToAction("Room", new { roomId = model.RoomId, date = model.Date.ToString("yyyy-MM-dd") });
         }
     }
     
@@ -111,23 +123,27 @@ public class BookingController : Controller
 
     // 6. Occupancy Overview (Read Only)
     [HttpGet]
-    public async Task<IActionResult> Occupancy(int roomId = 1, string? date = null)
+    public async Task<IActionResult> Occupancy(int? roomId = null, string? date = null)
     {
-        var selectedDate = string.IsNullOrEmpty(date) 
-            ? DateOnly.FromDateTime(DateTime.Today) 
+        if (roomId is null)
+        {
+            return RedirectToAction(nameof(MapOccupancy));
+        }
+
+        var selectedDate = string.IsNullOrEmpty(date)
+            ? DateOnly.FromDateTime(DateTime.Today)
             : DateOnly.Parse(date);
 
-         try
+        try
         {
-            var roomDto = await _bookingService.GetRoomStateAsync(roomId, selectedDate);
-            
+            var roomDto = await _bookingService.GetRoomStateAsync(roomId.Value, selectedDate);
+
             ViewBag.SelectedDate = selectedDate.ToString("yyyy-MM-dd");
-            ViewBag.IsReadOnly = true; 
+            ViewBag.IsReadOnly = true;
             ViewBag.Title = "Obsazenost Místnosti - Pøehled";
             ViewBag.CurrentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-            // Reuse "Room" view but with IsReadOnly flag
-            return View("Room", roomDto); 
+            return View("Room", roomDto);
         }
         catch (Exception ex)
         {

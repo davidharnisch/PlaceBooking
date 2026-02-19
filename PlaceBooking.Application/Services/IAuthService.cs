@@ -10,12 +10,3 @@ public interface IAuthService
     // Verify credentials, returns UserDto (without password) or null
     Task<UserDto?> VerifyCredentialsAsync(string email, string password, CancellationToken cancellationToken = default);
 }
-
-// Simple DTO for User result to keep Domain Entity hidden from Controller
-public class UserDto
-{
-    public int Id { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-}

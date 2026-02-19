@@ -79,12 +79,14 @@
 
                     <form id="seatCreateForm" asp-action="Create" method="post" class="d-none">
                         <input type="hidden" name="SeatId" id="seatCreateSeatId" />
+                        <input type="hidden" name="RoomId" value="@Model.Id" />
                         <input type="hidden" name="Date" value="@selectedDateRaw" />
                         <button type="submit" class="btn btn-primary">Ano, zabookovat</button>
                     </form>
 
                     <form id="seatCancelForm" asp-action="Cancel" method="post" class="d-none">
                         <input type="hidden" name="bookingId" id="seatCancelBookingId" />
+                        <input type="hidden" name="RoomId" id="@Model.Id" />
                         <input type="hidden" name="date" value="@selectedDateRaw" />
                         <button type="submit" class="btn btn-danger">Ano, zrušit</button>
                     </form>

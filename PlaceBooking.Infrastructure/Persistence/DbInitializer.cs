@@ -24,9 +24,7 @@ public static class DbInitializer
 
         var users = new User[]
         {
-            new User { FirstName = "Jan", LastName = "Novák", Email = "jan.novak@test.com", PasswordHash = defaultHash },
-            new User { FirstName = "Petr", LastName = "Svoboda", Email = "petr.svoboda@tulli.com", PasswordHash = defaultHash },
-            new User { FirstName = "Admin", LastName = "User", Email = "admin@placebooking.com", PasswordHash = defaultHash }
+            new User { FirstName = "Jan", LastName = "Novák", Email = "jan.novak@test.com", PasswordHash = defaultHash }
         };
 
         foreach (var u in users)

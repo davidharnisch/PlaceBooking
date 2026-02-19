@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Výbìr místnosti";
+    var isReadOnly = ViewBag.IsReadOnly as bool? ?? false;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -37,7 +38,10 @@
 
                     // select all elements whose id starts with "room-" (room-1, room-2, ...)
                     const rooms = svg.querySelectorAll('[id^="room-"]');
-                    const roomBaseUrl = '@Url.Action("Room", "Booking")';
+                    const isReadOnly = @Html.Raw(isReadOnly ? "true" : "false");
+                    const roomBaseUrl = isReadOnly
+                        ? '@Url.Action("Occupancy", "Booking")'
+                        : '@Url.Action("Room", "Booking")';
 
                     rooms.forEach(room => {
                         if (!room || !room.id) return;
