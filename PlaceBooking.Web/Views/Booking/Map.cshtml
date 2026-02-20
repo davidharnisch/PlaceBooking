@@ -10,55 +10,8 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <div class="pb-rooms-map" data-room-map>
+        <div class="pb-rooms-map" data-room-map data-read-only="@(isReadOnly ? "true" : "false")" data-room-base-url="@(isReadOnly ? Url.Action("Occupancy", "Booking") : Url.Action("Room", "Booking"))">
             <img class="img-fluid" src="~/images/rooms-map.svg" alt="Mapa místností" />
         </div>
     </div>
 </div>
-
-@section Scripts
-{
-    <script>
-        (function () {
-            const mapHost = document.querySelector('[data-room-map]');
-            if (!mapHost) return;
-
-            const img = mapHost.querySelector('img');
-            if (!img) return;
-
-            fetch(img.src)
-                .then(r => r.text())
-                .then(svgText => {
-                    mapHost.innerHTML = svgText;
-
-                    const svg = mapHost.querySelector('svg');
-                    if (!svg) return;
-
-                    svg.classList.add('pb-rooms-map-svg');
-
-                    // select all elements whose id starts with "room-" (room-1, room-2, ...)
-                    const rooms = svg.querySelectorAll('[id^="room-"]');
-                    const isReadOnly = @Html.Raw(isReadOnly ? "true" : "false");
-                    const roomBaseUrl = isReadOnly
-                        ? '@Url.Action("Occupancy", "Booking")'
-                        : '@Url.Action("Room", "Booking")';
-
-                    rooms.forEach(room => {
-                        if (!room || !room.id) return;
-
-                        room.classList.add('pb-room');
-
-                        room.addEventListener('click', () => {
-                            // parse numeric part from id like "room-1"
-                            const m = room.id.match(/room-(\d+)/i);
-                            const roomId = m ? m[1] : room.id;
-                            window.location.href = roomBaseUrl + '?roomId=' + encodeURIComponent(roomId);
-                        });
-                    });
-                })
-                .catch(() => {
-                    // Keep the <img> fallback.
-                });
-        })();
-    </script>
-}

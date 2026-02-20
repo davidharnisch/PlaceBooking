@@ -24,28 +24,28 @@ public class BookingService : IBookingService
         _seatRepository = seatRepository;
     }
 
-    public async Task<BookingDto> CreateBookingAsync(CreateBookingDto dto, CancellationToken cancellationToken = default)
+    public async Task<BookingDto> CreateBookingAsync(int userId, CreateBookingDto dto, CancellationToken cancellationToken = default)
     {
         // 1. Validate inputs
         var seat = await _seatRepository.GetByIdAsync(dto.SeatId, cancellationToken);
         if (seat == null)
-            throw new Exception($"Seat with ID {dto.SeatId} not found.");
+            throw new Exception($"Místo s ID {dto.SeatId} nebylo nalezeno.");
 
-        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (user == null)
-            throw new Exception($"User with ID {dto.UserId} not found.");
+            throw new Exception($"Uživatel s ID {userId} nebyl nalezen.");
 
         // 2. Check business rules (Concurrency check ideally belongs here or DB constraint)
         // Rule: Is seat free for this date?
         var isBooked = await _bookingRepository.ExistsForSeatAndDateAsync(dto.SeatId, dto.Date, cancellationToken);
         if (isBooked)
-            throw new Exception("Seat is already booked for this date.");
+            throw new Exception("Toto místo je pro daný den již rezervované.");
 
         // 3. Create Entity
         var booking = new Booking
         {
             SeatId = dto.SeatId,
-            UserId = dto.UserId,
+            UserId = userId,
             Date = dto.Date,
             CreatedAt = DateTime.UtcNow
         };
@@ -62,7 +62,7 @@ public class BookingService : IBookingService
             // Since we added unique index on SeatId + Date, this will fail if simulation race condition occurs.
             if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE constraint failed"))
             {
-                throw new Exception("Seat is already booked for this date (Concurrency conflict).");
+                throw new Exception("Toto místo je pro daný den již rezervované (souèasná rezervace).");
             }
             throw; // Rethrow other errors
         }
@@ -82,16 +82,16 @@ public class BookingService : IBookingService
     {
         var booking = await _bookingRepository.GetByIdAsync(bookingId, cancellationToken);
         if (booking == null)
-            throw new Exception("Booking not found.");
+            throw new Exception("Rezervace nebyla nalezena.");
 
         // Rule: Can cancel only own booking
         if (booking.UserId != userId)
-            throw new Exception("You can only cancel your own bookings.");
+            throw new Exception("Mùžete zrušit pouze svou vlastní rezervaci.");
 
         // Rule: Cannot cancel past bookings (optional, based on req)
         // "To mùže maximálnì v ten daný den, nikoliv zpìtnì." -> Can cancel today or future.
         if (booking.Date < DateOnly.FromDateTime(DateTime.UtcNow))
-             throw new Exception("Cannot cancel past bookings.");
+             throw new Exception("Nelze zrušit rezervace v minulosti.");
 
         await _bookingRepository.DeleteAsync(booking, cancellationToken);
     }
@@ -101,7 +101,7 @@ public class BookingService : IBookingService
         // 1. Get Room with Seats
         var room = await _roomRepository.GetRoomWithSeatsAsync(roomId, cancellationToken);
         if (room == null)
-             throw new Exception($"Room with ID {roomId} not found.");
+             throw new Exception($"Místnost s ID {roomId} nebyla nalezena.");
 
         // 2. Get Bookings for this room and date
         var bookings = await _bookingRepository.GetByDateAndRoomAsync(date, roomId, cancellationToken);
@@ -143,8 +143,8 @@ public class BookingService : IBookingService
         {
             Id = b.Id,
             Date = b.Date,
-            SeatLabel = b.Seat?.Label ?? "Unknown",
-            RoomName = b.Seat?.Room?.Name ?? "Unknown",
+            SeatLabel = b.Seat?.Label ?? "Neznámé",
+            RoomName = b.Seat?.Room?.Name ?? "Neznámé",
             UserName = $"{b.User?.FirstName} {b.User?.LastName}", // Should be current user
             CreatedAt = b.CreatedAt
         });
@@ -176,8 +176,8 @@ public class BookingService : IBookingService
 
             result.Add(new SeatStatisticsDto
             {
-                RoomName = group.FirstBooking.Seat.Room?.Name ?? "Unknown",
-                SeatLabel = group.FirstBooking.Seat.Label ?? "Unknown",
+                RoomName = group.FirstBooking.Seat.Room?.Name ?? "Neznámé",
+                SeatLabel = group.FirstBooking.Seat.Label ?? "Neznámé",
                 BookingsCount = group.Count
             });
         }

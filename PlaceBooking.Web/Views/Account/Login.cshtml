@@ -21,18 +21,21 @@
                 }
 
                 <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="name@example.com" required  />
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Heslo</label>
+                        <label asp-for="Password" class="form-label"></label>
                         <div class="input-group">
-                            <input type="password" name="password" class="form-control" id="Password" required />
+                            <input asp-for="Password" type="password" class="form-control" id="Password" />
                             <button type="button" class="btn btn-outline-secondary btn-toggle-password" data-target="Password" aria-label="Zobrazit/skrýt heslo">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
+                        <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary btn-cta">Pøihlásit se</button>
@@ -53,12 +56,7 @@
 </div>
 
 @section Scripts {
-    <script>
-        // ensure password toggles are initialized for this view
-        (function () {
-            if (typeof setupPasswordToggles === 'function') {
-                try { setupPasswordToggles(document); } catch { }
-            }
-        })();
-    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

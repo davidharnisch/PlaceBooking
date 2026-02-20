@@ -16,13 +16,13 @@ public class BookingController : Controller
         _bookingService = bookingService;
     }
 
-    // 1. Dashboard - Main entry point
+    //Dashboard - Main entry point
     public IActionResult Index()
     {
         return View();
     }
 
-    // 1.5 Rooms map (selection)
+    // Rooms map (selection)
     [HttpGet]
     public IActionResult Map()
     {
@@ -36,7 +36,7 @@ public class BookingController : Controller
         return View("Map");
     }
 
-    // 2. Room and Date Selection (Map)
+    // Room and Date Selection (Map)
     [HttpGet]
     public async Task<IActionResult> Room(int? roomId = null, string? date = null)
     {
@@ -67,16 +67,14 @@ public class BookingController : Controller
         }
     }
 
-    // 3. Booking Action (called via Form)
+    // Booking Action (called via Form)
     [HttpPost]
     public async Task<IActionResult> Create(CreateBookingDto model)
     {
         try
         {
-            // Use logged in user ID
-            model.UserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            await _bookingService.CreateBookingAsync(model);
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            await _bookingService.CreateBookingAsync(userId, model);
             
             TempData["SuccessMessage"] = "Rezervace úspìšnì vytvoøena!";
             return RedirectToAction("Room", new { roomId = model.RoomId, date = model.Date.ToString("yyyy-MM-dd") });
@@ -88,7 +86,7 @@ public class BookingController : Controller
         }
     }
     
-    // 4. Cancel Booking
+    // Cancel Booking
     [HttpPost]
     public async Task<IActionResult> Cancel(int bookingId, string date)
     {

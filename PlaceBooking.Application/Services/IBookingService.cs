@@ -5,7 +5,7 @@ namespace PlaceBooking.Application.Services;
 public interface IBookingService
 {
     // Returns true if success, throws exception if validation fails
-    Task<BookingDto> CreateBookingAsync(CreateBookingDto dto, CancellationToken cancellationToken = default);
+    Task<BookingDto> CreateBookingAsync(int userId, CreateBookingDto dto, CancellationToken cancellationToken = default);
     
     // Cancel booking (logic: can cancel only own booking and only for today/future)
     Task CancelBookingAsync(int bookingId, int userId, CancellationToken cancellationToken = default);
